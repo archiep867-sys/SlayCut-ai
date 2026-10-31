@@ -1,0 +1,197 @@
+// Prisma schema for CLIPFORGE AI
+// Production Content Intelligence Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  avatar        String?
+  role          String    @default("creator") // "creator", "agency", "admin"
+  isDemo        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  brandDNA            BrandDNA?
+  videoProjects       VideoProject[]
+  extractedClips      ExtractedClip[]
+  abExperiments       ABExperiment[]
+  contentCalendar     ContentCalendarItem[]
+  campaignStrategies  CampaignStrategy[]
+  competitorIntels    CompetitorIntel[]
+  analyticsSnapshots  AnalyticsSnapshot[]
+  learningPreferences LearningPreference?
+}
+
+model BrandDNA {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandName          String
+  tagline            String?
+  niche              String   // e.g. "Tech & AI", "Finance & Investing", "Creator Economy", "Health & Longevity"
+  targetAudience     String   // e.g. "SaaS Founders, Senior Engineers, and Product Builders"
+  toneProfile        String   // JSON string: { formality: 40, humor: 65, enthusiasm: 85, provocation: 70, technicalDepth: 60 }
+  voiceArchetype     String   // e.g. "The Visionary Provocateur", "The Practical Builder", "The Deep Thinker"
+  bannedPhrases      String   // JSON string array: ["Game changer", "In this video", "Like and subscribe"]
+  preferredKeywords  String   // JSON string array: ["High leverage", "Architecture", "Zero to one", "Execution"]
+  learnedRules       String   // JSON string array of learned guidelines from user edits
+  editHistory        String   // JSON string array of diffs
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model VideoProject {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  sourceUrl       String?
+  videoType       String   @default("podcast") // "podcast", "keynote", "interview", "youtube"
+  durationSeconds Float    @default(0)
+  status          String   @default("completed") // "uploaded", "transcribing", "analyzing", "completed", "failed"
+  transcriptText  String?
+  transcriptJson  String?  // JSON string: array of { id, start, end, speaker, text, score, sentiment }
+  thumbnailUrl    String?
+  metadataJson    String?  // JSON string: resolution, fps, bitrate, audioTracks
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  clips           ExtractedClip[]
+  abExperiments   ABExperiment[]
+}
+
+model ExtractedClip {
+  id                   String        @id @default(cuid())
+  videoProjectId       String
+  videoProject         VideoProject  @relation(fields: [videoProjectId], references: [id], onDelete: Cascade)
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title                String
+  summary              String
+  startTime            Float
+  endTime              Float
+  durationSeconds      Float
+  viralityScore        Int           // 0 - 100
+  viralityMetrics      String        // JSON: { hookImpact: 94, energyPacing: 88, valueDensity: 92, retentionPrediction: 89, brandAlignment: 96 }
+  explainableReasons   String        // JSON string array: ["Strong curiosity gap in first 2.4s", "Elevated emotional inflection at 18s", "Concrete actionable framework revealed"]
+  hookVariations       String        // JSON string array of hooks
+  captionPresets       String        // JSON string: { tiktok: "", instagram: "", youtube: "", linkedin: "", x: "" }
+  recommendedHashtags  String        // JSON string array
+  subtitleStyle        String        @default("karaoke_pop") // "karaoke_pop", "mr_beast", "minimal_clean", "neon_cyber"
+  status               String        @default("extracted") // "extracted", "approved", "scheduled", "published"
+  performanceFeedback  String?       // "high", "neutral", "low"
+  creatorEditsJson     String?       // JSON diffs
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  abExperiments        ABExperiment[]
+  calendarItems        ContentCalendarItem[]
+}
+
+model ABExperiment {
+  id                String         @id @default(cuid())
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoProjectId    String?
+  videoProject      VideoProject?  @relation(fields: [videoProjectId], references: [id], onDelete: SetNull)
+  clipId            String?
+  clip              ExtractedClip? @relation(fields: [clipId], references: [id], onDelete: SetNull)
+  title             String
+  testType          String         // "hook", "caption", "thumbnail"
+  variantsJson      String         // JSON string: array of { id, label, content, predictedCtr, confidence, audienceReaction, simulatedImpressions, simulatedClicks }
+  winnerVariantId   String?
+  status            String         @default("running") // "draft", "running", "concluded"
+  insightsSummary   String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model ContentCalendarItem {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clipId           String?
+  clip             ExtractedClip? @relation(fields: [clipId], references: [id], onDelete: SetNull)
+  title            String
+  platform         String         // "tiktok", "instagram", "youtube", "linkedin", "x"
+  scheduledFor     DateTime
+  status           String         @default("scheduled") // "scheduled", "published", "draft"
+  hookUsed         String
+  captionUsed      String
+  hashtagsUsed     String         // JSON array
+  campaignTheme    String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model CampaignStrategy {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String
+  goal             String   // e.g. "Generate 1,000 High-Intent Waitlist Signups in 30 Days"
+  niche            String
+  targetAudience   String
+  durationDays     Int      @default(30)
+  thematicPillars  String   // JSON string: array of { week: 1, title: "", focus: "", expectedOutput: "" }
+  dailyRoadmap     String   // JSON string: array of daily recommendations
+  status           String   @default("active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model CompetitorIntel {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competitorHandle   String   // e.g. "@alexhormozi" or "@thesamparr"
+  platform           String   // "youtube", "tiktok", "instagram", "x"
+  channelName        String
+  followersCount     String
+  topViralHooks      String   // JSON array of strings
+  contentStyle       String   // breakdown description
+  counterStrategy    String   // actionable AI counter-angle
+  benchmarkMetrics   String   // JSON: { avgViews: "450K", viralityVelocity: "9.2x", formatWinner: "Talking Head + Fast Cuts" }
+  lastAnalyzedAt     DateTime @default(now())
+  createdAt          DateTime @default(now())
+}
+
+model AnalyticsSnapshot {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period                String   @default("30d") // "7d", "30d", "90d"
+  totalViews            Int      @default(0)
+  totalEngagement       Int      @default(0)
+  avgRetentionRate      Float    @default(0.0)
+  clipsGenerated        Int      @default(0)
+  platformBreakdown     String   // JSON string: { tiktok: { views, reach, eng }, instagram: ... }
+  retentionCurveJson    String   // JSON string: array of { second, retentionRate, label }
+  topPerformingHooks    String   // JSON string
+  createdAt             DateTime @default(now())
+}
+
+model LearningPreference {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hookImpactWeight       Float    @default(1.2)
+  pacingEnergyWeight     Float    @default(1.0)
+  valueDensityWeight     Float    @default(1.1)
+  brandAlignmentWeight   Float    @default(1.3)
+  retentionWeight        Float    @default(1.0)
+  feedbackCount          Int      @default(0)
+  learnedPatterns        String   // JSON array of detected preference rules
+  updatedAt              DateTime @updatedAt
+}
