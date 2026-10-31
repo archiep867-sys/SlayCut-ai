@@ -11,9 +11,10 @@
 
 ---
 
-## 🚀 Live Demo & Repository
+## 🚀 Live Deployment & Repository
+- **Live Public HTTPS URL:** [https://clipforge-ai.loca.lt](https://clipforge-ai.loca.lt) *(Tunnel Password if prompted: `206.84.228.156`)*
 - **GitHub Repository:** [https://github.com/archiep867-sys/clipforge-ai](https://github.com/archiep867-sys/clipforge-ai)
-- **Live Application URL:** [https://clipforge-ai.vercel.app](https://clipforge-ai.vercel.app) *(or self-hosted on Vercel / Railway / Docker)*
+- **Local Dashboard:** [http://localhost:3000](http://localhost:3000)
 
 ---
 
