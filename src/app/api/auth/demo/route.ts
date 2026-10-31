@@ -5,7 +5,7 @@ import { signToken, getAuthCookieName } from '@/lib/auth';
 export async function POST() {
   try {
     const user = await prisma.user.findFirst({
-      where: { email: 'archie@clipforge.ai' },
+      where: { email: 'archie@slaycut.ai' },
       include: { brandDNA: true },
     });
 

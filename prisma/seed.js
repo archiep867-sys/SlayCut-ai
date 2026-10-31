@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding ClipForge AI database...');
+  console.log('🌱 Seeding SLAYCUT AI database...');
 
   // Clean existing records if any
   await prisma.learningPreference.deleteMany();
@@ -18,12 +18,12 @@ async function main() {
   await prisma.brandDNA.deleteMany();
   await prisma.user.deleteMany();
 
-  const passwordHash = await bcrypt.hash('clipforge2026!', 10);
+  const passwordHash = await bcrypt.hash('slaycut2026!', 10);
 
   // 1. Create Demo User
   const user = await prisma.user.create({
     data: {
-      email: 'archie@clipforge.ai',
+      email: 'archie@slaycut.ai',
       name: 'Archie Patel',
       passwordHash,
       role: 'creator',

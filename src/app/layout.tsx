@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CLIPFORGE AI — Content Intelligence & Viral Video Extraction Platform',
+  title: 'SLAYCUT — Content Intelligence & Viral Video Extraction Platform',
   description:
     'Production-ready AI content intelligence platform for long-form video transcription, explainable virality scoring, persistent brand voice memory, and multi-platform growth.',
   keywords: [

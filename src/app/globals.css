@@ -2,75 +2,393 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   SLAYCUT DESIGN SYSTEM — Global CSS
+   Brand: Deep Charcoal + Cream + Butter Yellow
+   Aesthetic: Cinematic Editorial / Creator Studio
+   ============================================= */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Caveat:wght@400;600;700&display=swap');
+
 :root {
-  --background: #07090e;
-  --foreground: #f8fafc;
+  --background: #0d0d0d;
+  --foreground: #f5f0e8;
+  --font-display: 'Oswald', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-hand:    'Caveat', cursive;
+
+  /* SLAYCUT Brand Tokens */
+  --sc-black:    #0d0d0d;
+  --sc-charcoal: #1a1a1a;
+  --sc-graphite: #252525;
+  --sc-iron:     #2e2e2e;
+  --sc-cream:    #f5f0e8;
+  --sc-butter:   #f4d03f;
+  --sc-orange:   #e8571a;
+  --sc-teal:     #0d9488;
+  --sc-purple:   #7c3aed;
+  --sc-film:     #1c1a14;
+
+  /* Spacing / Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* ── Base Resets ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Custom dark glassmorphism */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* ── Typography Utilities ── */
+.font-display {
+  font-family: var(--font-display);
+}
+.font-hand {
+  font-family: var(--font-hand);
 }
 
-.glass-panel-hover:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(99, 102, 241, 0.35);
+.editorial-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
-/* Custom modern scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #080b14;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+.editorial-caption {
+  font-family: var(--font-hand);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--sc-butter);
 }
 
-/* Glow utilities */
-.glow-indigo {
-  box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.35);
+/* ── Grain Texture Overlay ── */
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.035;
+  border-radius: inherit;
+  z-index: 1;
 }
 
-.glow-emerald {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
+/* ── Film Strip ── */
+.film-strip-top {
+  position: relative;
+}
+.film-strip-top::before {
+  content: '';
+  display: block;
+  height: 20px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--sc-black) 0px, var(--sc-black) 8px,
+      var(--sc-charcoal) 8px, var(--sc-charcoal) 12px,
+      var(--sc-black) 12px, var(--sc-black) 24px
+    );
+  border-bottom: 2px solid rgba(244,208,63,0.15);
 }
 
-.glow-pink {
-  box-shadow: 0 0 25px -5px rgba(236, 72, 153, 0.35);
+.film-strip-border {
+  border-left: 3px solid transparent;
+  border-image: repeating-linear-gradient(
+    180deg,
+    var(--sc-butter) 0px,
+    var(--sc-butter) 6px,
+    transparent 6px,
+    transparent 12px
+  ) 1;
 }
 
-/* Shimmer animation */
+/* ── SLAYCUT Card ── */
+.sc-card {
+  background: var(--sc-charcoal);
+  border: 1px solid rgba(245,240,232,0.08);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.sc-card:hover {
+  border-color: rgba(244,208,63,0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(244,208,63,0.12);
+}
+
+/* ── SLAYCUT Button styles ── */
+.sc-btn-primary {
+  background: var(--sc-butter);
+  color: var(--sc-black);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-md);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.sc-btn-primary:hover {
+  background: #e0c235;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(244,208,63,0.35);
+}
+
+.sc-btn-secondary {
+  background: transparent;
+  color: var(--sc-cream);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(245,240,232,0.18);
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.sc-btn-secondary:hover {
+  border-color: rgba(245,240,232,0.4);
+  background: rgba(245,240,232,0.06);
+}
+
+.sc-btn-orange {
+  background: var(--sc-orange);
+  color: var(--sc-cream);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-md);
+  transition: background 0.2s, transform 0.15s;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.sc-btn-orange:hover {
+  background: #d14d15;
+  transform: translateY(-1px);
+}
+
+/* ── Score Badges ── */
+.sc-score-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 10px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.sc-score-badge:hover { transform: scale(1.08); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--sc-black); }
+::-webkit-scrollbar-thumb { background: var(--sc-iron); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3e3e3e; }
+
+/* ── Glow utilities ── */
+.glow-butter  { box-shadow: 0 0 28px -6px rgba(244,208,63,0.45); }
+.glow-orange  { box-shadow: 0 0 28px -6px rgba(232,87,26,0.4); }
+.glow-teal    { box-shadow: 0 0 28px -6px rgba(13,148,136,0.4); }
+.glow-purple  { box-shadow: 0 0 28px -6px rgba(124,58,237,0.4); }
+
+/* Legacy compat */
+.glow-indigo  { box-shadow: 0 0 25px -5px rgba(244,208,63,0.3); }
+.glow-emerald { box-shadow: 0 0 25px -5px rgba(13,148,136,0.35); }
+.glow-pink    { box-shadow: 0 0 25px -5px rgba(232,87,26,0.35); }
+
+/* ── Shimmer ── */
 @keyframes shimmerWave {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .shimmer-text {
-  background: linear-gradient(90deg, #818cf8 0%, #c084fc 50%, #818cf8 100%);
+  background: linear-gradient(90deg, #f4d03f 0%, #f5f0e8 45%, #f4d03f 100%);
   background-size: 200% auto;
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
   animation: shimmerWave 4s linear infinite;
 }
+
+/* ── Perforations (film holes) ── */
+.film-perf {
+  position: relative;
+}
+.film-perf::before,
+.film-perf::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 12px;
+  background: var(--sc-black);
+  border-radius: 2px;
+  border: 1px solid rgba(245,240,232,0.12);
+}
+.film-perf::before { left: -12px; }
+.film-perf::after  { right: -12px; }
+
+/* ── Ticker tape ── */
+.sc-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.sc-ticker-inner {
+  display: inline-flex;
+  animation: ticker 30s linear infinite;
+  gap: 2rem;
+}
+.sc-ticker-inner:hover { animation-play-state: paused; }
+
+/* ── Sticker / accent labels ── */
+.sc-sticker {
+  font-family: var(--font-hand);
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--sc-butter);
+  color: var(--sc-black);
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+  display: inline-block;
+  transform: rotate(-1.5deg);
+  line-height: 1.4;
+}
+
+.sc-sticker-orange {
+  background: var(--sc-orange);
+  color: var(--sc-cream);
+  transform: rotate(1deg);
+}
+
+/* ── Editorial divider ── */
+.sc-divider {
+  border: none;
+  border-top: 1px solid rgba(245,240,232,0.07);
+  margin: 1.5rem 0;
+}
+
+/* ── Demo badge ── */
+.sc-demo-badge {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--sc-orange);
+  border: 1px solid rgba(232,87,26,0.4);
+  background: rgba(232,87,26,0.08);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Glass panel (legacy compat) ── */
+.glass-panel {
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(245,240,232,0.08);
+}
+.glass-panel-hover:hover {
+  background: rgba(37,37,37,0.92);
+  border-color: rgba(244,208,63,0.25);
+}
+
+/* ── Input style ── */
+.sc-input {
+  background: var(--sc-graphite);
+  border: 1px solid rgba(245,240,232,0.12);
+  border-radius: var(--radius-md);
+  color: var(--sc-cream);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.sc-input:focus {
+  border-color: rgba(244,208,63,0.5);
+  box-shadow: 0 0 0 2px rgba(244,208,63,0.12);
+}
+.sc-input::placeholder { color: rgba(245,240,232,0.3); }
+
+/* ── Asymmetric grid helpers ── */
+.sc-grid-editorial {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 768px) {
+  .sc-grid-editorial { grid-template-columns: 1fr; }
+}
+
+/* ── Cinematic section headers ── */
+.sc-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.sc-section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--sc-cream);
+  line-height: 1;
+}
+.sc-section-accent {
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  color: var(--sc-butter);
+  font-weight: 600;
+}
+
+/* ── Animate-in (for modals/dropdowns) ── */
+@keyframes animateIn {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-in {
+  animation: animateIn 0.2s ease forwards;
+}
+.fade-in  { opacity: 0; animation: animateIn 0.25s ease forwards; }
+.zoom-in-95 { transform-origin: top right; }

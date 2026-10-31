@@ -1,7 +1,17 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Play, Pause, Volume2, VolumeX, Download, Sparkles, Check, Share2 } from 'lucide-react';
+import {
+  X,
+  Play,
+  Pause,
+  Download,
+  Sparkles,
+  Check,
+  FileText,
+  Video,
+  Film,
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface VideoPlayerModalProps {
@@ -16,6 +26,9 @@ interface VideoPlayerModalProps {
     viralityScore: number;
     subtitleStyle?: string;
     summary?: string;
+    renderedVerticalUrl?: string;
+    renderedVideoUrl?: string;
+    subtitleSrtUrl?: string;
     videoProject?: {
       sourceUrl?: string;
     };
@@ -28,12 +41,26 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
   const [subtitleStyle, setSubtitleStyle] = useState<'karaoke_pop' | 'mr_beast' | 'minimal_clean' | 'neon_cyber'>(
     (clip.subtitleStyle as any) || 'karaoke_pop'
   );
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportedSuccess, setExportedSuccess] = useState(false);
+
+  // Render & Download state
+  const [isRendering, setIsRendering] = useState(false);
+  const [renderedData, setRenderedData] = useState<{
+    verticalMp4?: string;
+    standardMp4?: string;
+    subtitlesSrt?: string;
+  } | null>(
+    clip.renderedVerticalUrl
+      ? {
+          verticalMp4: clip.renderedVerticalUrl,
+          standardMp4: clip.renderedVideoUrl,
+          subtitlesSrt: clip.subtitleSrtUrl,
+        }
+      : null
+  );
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Subtitle mock words synchronized with playback time
+  // Synchronized subtitle tokens
   const sampleWords = [
     { text: '99%', start: 0.0, end: 0.8 },
     { text: 'OF', start: 0.8, end: 1.1 },
@@ -70,31 +97,42 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
 
   if (!isOpen) return null;
 
-  const handleExport = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      setExportedSuccess(true);
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.7 },
+  const handleRenderClip = async () => {
+    setIsRendering(true);
+    try {
+      const res = await fetch(`/api/clips/${clip.id}/render`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'vertical' }),
       });
-      setTimeout(() => setExportedSuccess(false), 4000);
-    }, 1500);
+
+      const data = await res.json();
+      if (data.success && data.downloads) {
+        setRenderedData(data.downloads);
+        confetti({
+          particleCount: 90,
+          spread: 60,
+          origin: { y: 0.7 },
+        });
+      }
+    } catch (err) {
+      console.error('Error rendering clip:', err);
+    } finally {
+      setIsRendering(false);
+    }
   };
 
   const getSubtitleClass = (style: string) => {
     switch (style) {
       case 'mr_beast':
-        return 'font-black tracking-wider uppercase text-yellow-300 drop-shadow-[0_4px_4px_rgba(0,0,0,0.9)] stroke-black text-2xl';
+        return 'font-black tracking-wider uppercase text-yellow-300 drop-shadow-[0_4px_4px_rgba(0,0,0,0.9)] text-xl';
       case 'minimal_clean':
-        return 'font-medium tracking-normal text-white bg-black/60 px-3 py-1 rounded-md text-base backdrop-blur-sm';
+        return 'font-medium tracking-normal text-white bg-black/60 px-3 py-1 rounded-md text-sm backdrop-blur-sm';
       case 'neon_cyber':
-        return 'font-bold uppercase tracking-widest text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)] text-xl';
+        return 'font-bold uppercase tracking-widest text-cyan-300 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)] text-lg';
       case 'karaoke_pop':
       default:
-        return 'font-extrabold uppercase text-white drop-shadow-md text-xl';
+        return 'font-extrabold uppercase text-white drop-shadow-md text-lg';
     }
   };
 
@@ -112,27 +150,37 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
         {/* 9:16 Vertical Reel Player Preview */}
         <div className="md:w-1/2 bg-black flex items-center justify-center p-6 border-b md:border-b-0 md:border-r border-slate-800">
           <div className="relative w-[270px] h-[480px] bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-800 flex flex-col justify-between">
-            {/* Background Simulated Video Frame */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-slate-900 to-indigo-950 flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"
-                alt="Frame"
-                className="w-full h-full object-cover opacity-60"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40"></div>
+            {/* Background Simulated or Real Video */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-slate-900 to-indigo-950 flex items-center justify-center overflow-hidden">
+              {renderedData?.verticalMp4 ? (
+                <video
+                  ref={videoRef}
+                  src={renderedData.verticalMp4}
+                  className="w-full h-full object-cover"
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80"
+                  alt="Frame"
+                  className="w-full h-full object-cover opacity-60"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
             </div>
 
-            {/* Top Reel Header Bar */}
+            {/* Top Header Bar */}
             <div className="relative z-10 p-3 flex items-center justify-between text-white/90 text-xs">
-              <span className="px-2 py-0.5 rounded bg-black/40 backdrop-blur-md text-[10px] font-mono">
-                9:16 Shorts / Reel
+              <span className="px-2 py-0.5 rounded bg-black/50 backdrop-blur-md text-[10px] font-mono">
+                9:16 {clip.durationSeconds}s
               </span>
-              <span className="px-2 py-0.5 rounded bg-indigo-500/80 font-bold text-[10px]">
+              <span className="px-2 py-0.5 rounded bg-indigo-500 font-bold text-[10px]">
                 {clip.viralityScore} Virality
               </span>
             </div>
 
-            {/* Subtitle Animated Overlay (Center/Lower third) */}
+            {/* Subtitle Animated Overlay */}
             <div className="relative z-10 px-4 text-center my-auto">
               <div className={getSubtitleClass(subtitleStyle)}>
                 {sampleWords.map((word, idx) => {
@@ -141,9 +189,7 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
                     <span
                       key={idx}
                       className={`inline-block mx-1 transition-transform duration-100 ${
-                        isActive
-                          ? 'scale-125 text-yellow-400 font-extrabold underline'
-                          : 'opacity-90'
+                        isActive ? 'scale-125 text-yellow-400 font-extrabold underline' : 'opacity-90'
                       }`}
                     >
                       {word.text}
@@ -155,7 +201,6 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
 
             {/* Bottom Controls Bar inside phone frame */}
             <div className="relative z-10 p-4 bg-gradient-to-t from-black/95 to-transparent">
-              {/* Progress Slider */}
               <div className="w-full h-1 bg-white/20 rounded-full mb-3 cursor-pointer overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 rounded-full"
@@ -178,19 +223,19 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
           </div>
         </div>
 
-        {/* Right Configuration & Export Panel */}
+        {/* Right Configuration & Download Action Panel */}
         <div className="md:w-1/2 p-6 flex flex-col justify-between overflow-y-auto">
           <div>
             <div className="mb-4">
               <span className="text-[10px] uppercase tracking-wider text-indigo-400 font-bold">
-                Clip Editor & Subtitle Studio
+                FFmpeg Clip & Subtitle Studio
               </span>
               <h3 className="text-lg font-bold text-white tracking-tight mt-1">{clip.title}</h3>
               <p className="text-xs text-slate-400 mt-1 line-clamp-2">{clip.summary}</p>
             </div>
 
             {/* Subtitle Styling Presets */}
-            <div className="mb-6">
+            <div className="mb-5">
               <label className="text-xs font-semibold text-slate-300 block mb-2">
                 Animated Subtitle Style
               </label>
@@ -204,9 +249,9 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
                   <button
                     key={s.id}
                     onClick={() => setSubtitleStyle(s.id as any)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                    className={`p-2 rounded-xl border text-left transition-all ${
                       subtitleStyle === s.id
-                        ? 'bg-indigo-500/20 border-indigo-500 text-white shadow-sm shadow-indigo-500/20'
+                        ? 'bg-indigo-500/20 border-indigo-500 text-white shadow-sm'
                         : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
@@ -217,57 +262,78 @@ export default function VideoPlayerModal({ isOpen, onClose, clip }: VideoPlayerM
               </div>
             </div>
 
-            {/* Aspect Ratio Presets */}
-            <div className="mb-6">
-              <label className="text-xs font-semibold text-slate-300 block mb-2">
-                Target Render Format
-              </label>
-              <div className="flex gap-2">
-                <span className="px-3 py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-xs font-medium text-indigo-300">
-                  9:16 Vertical (Reels / TikTok / Shorts)
-                </span>
-                <span className="px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-800 text-xs text-slate-400">
-                  1:1 Square (LinkedIn / X)
-                </span>
+            {/* Timestamps */}
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs mb-5 space-y-1">
+              <div className="flex justify-between text-slate-400">
+                <span>Start Time:</span>
+                <span className="font-mono text-slate-200 font-bold">{clip.startTime}s</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>End Time:</span>
+                <span className="font-mono text-slate-200 font-bold">{clip.endTime}s</span>
+              </div>
+              <div className="flex justify-between text-slate-400">
+                <span>Duration:</span>
+                <span className="font-mono text-indigo-400 font-bold">{clip.durationSeconds}s</span>
               </div>
             </div>
           </div>
 
-          {/* Export Action */}
-          <div className="pt-4 border-t border-slate-800">
-            {exportedSuccess && (
-              <div className="mb-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>9:16 Vertical Reel rendered & downloaded successfully!</span>
-              </div>
-            )}
+          {/* Action / Download Area */}
+          <div className="pt-4 border-t border-slate-800 space-y-3">
+            {renderedData ? (
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Real Video Rendered with FFmpeg & Subtitles Ready!</span>
+                </div>
 
-            <div className="flex items-center gap-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={renderedData.verticalMp4}
+                    download={`${clip.title.slice(0, 20)}_9x16.mp4`}
+                    className="p-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/20"
+                  >
+                    <Film className="w-3.5 h-3.5" />
+                    <span>Download 9:16 MP4</span>
+                  </a>
+
+                  <a
+                    href={renderedData.subtitlesSrt}
+                    download={`${clip.title.slice(0, 20)}.srt`}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center flex items-center justify-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Download .SRT</span>
+                  </a>
+                </div>
+              </div>
+            ) : (
               <button
-                onClick={handleExport}
-                disabled={isExporting}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                onClick={handleRenderClip}
+                disabled={isRendering}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                {isExporting ? (
+                {isRendering ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    <span>Rendering 1080x1920 MP4...</span>
+                    <span>Rendering with FFmpeg...</span>
                   </>
                 ) : (
                   <>
-                    <Download className="w-4 h-4" />
-                    <span>Export High-Res 9:16 Clip</span>
+                    <Film className="w-4 h-4" />
+                    <span>Render Video Clip with FFmpeg</span>
                   </>
                 )}
               </button>
+            )}
 
-              <button
-                onClick={onClose}
-                className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition-colors"
+            >
+              Close Studio
+            </button>
           </div>
         </div>
       </div>

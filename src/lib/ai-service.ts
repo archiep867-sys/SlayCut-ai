@@ -1,6 +1,10 @@
-// CLIPFORGE AI Core Content Intelligence Engine
-// Features: Explainable Selection Scoring, Multi-Platform Repurposing,
-// Brand DNA Voice Memory, Adaptive Learning Feedback Loop, and A/B Testing.
+// SLAYCUT Core Content Intelligence Engine
+// Features: Genuine AI Inference (OpenAI / Gemini) with Fallback Demo Mode,
+// Explainable Virality Scoring, Multi-Platform Repurposing,
+// Brand DNA Voice Memory & Creator Edit Feedback Loop.
+
+import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface ViralityMetrics {
   hookImpact: number;
@@ -29,6 +33,8 @@ export interface ExtractedClipCandidate {
   };
   recommendedHashtags: string[];
   subtitleStyle: 'karaoke_pop' | 'mr_beast' | 'minimal_clean' | 'neon_cyber';
+  isSimulated?: boolean;
+  aiProvider?: 'openai-gpt4o' | 'gemini-1.5' | 'builtin-deterministic';
 }
 
 export interface BrandDnaProfile {
@@ -68,21 +74,179 @@ export class ContentIntelligenceEngine {
   }
 
   public isLiveAiAvailable(): boolean {
-    return Boolean(this.openaiKey || this.geminiKey);
+    return Boolean(this.openaiKey.trim() || this.geminiKey.trim());
   }
 
   /**
    * Intelligently extracts the top viral clips from transcript segments
-   * with full explainability and multi-platform packaging.
+   * using genuine LLM inference (Gemini/OpenAI) or deterministic rule-based engine.
    */
   public async extractViralClips(
     transcript: TranscriptSegment[],
     brand: BrandDnaProfile,
-    weights = { hook: 1.3, pacing: 1.1, value: 1.25, brand: 1.3, retention: 1.2 }
+    weights = { hook: 1.3, pacing: 1.1, value: 1.25, brand: 1.3, retention: 1.2 },
+    customOpenaiKey?: string,
+    customGeminiKey?: string
   ): Promise<ExtractedClipCandidate[]> {
-    if (transcript.length === 0) return [];
+    if (!transcript || transcript.length === 0) return [];
 
-    // Chunk segments into candidate windows (between 15s and 60s)
+    const effectiveOpenaiKey = customOpenaiKey || this.openaiKey;
+    const effectiveGeminiKey = customGeminiKey || this.geminiKey;
+
+    // 1. Try Live OpenAI GPT-4o inference if key provided
+    if (effectiveOpenaiKey && effectiveOpenaiKey.trim().length > 10) {
+      try {
+        console.log('🤖 Invoking live OpenAI GPT-4o for content intelligence extraction...');
+        const openai = new OpenAI({ apiKey: effectiveOpenaiKey });
+        const clips = await this.callOpenAiExtraction(openai, transcript, brand, weights);
+        if (clips.length > 0) return clips;
+      } catch (err) {
+        console.warn('OpenAI live inference failed, checking Gemini fallback:', err);
+      }
+    }
+
+    // 2. Try Live Google Gemini inference if key provided
+    if (effectiveGeminiKey && effectiveGeminiKey.trim().length > 10) {
+      try {
+        console.log('🤖 Invoking live Google Gemini 1.5 for content intelligence extraction...');
+        const genAI = new GoogleGenerativeAI(effectiveGeminiKey);
+        const clips = await this.callGeminiExtraction(genAI, transcript, brand, weights);
+        if (clips.length > 0) return clips;
+      } catch (err) {
+        console.warn('Gemini live inference failed, falling back to deterministic model:', err);
+      }
+    }
+
+    // 3. Fallback to deterministic engine (clearly tagged as Demo Mode)
+    console.log('⚡️ Running deterministic content intelligence engine (Demo Mode)...');
+    return this.runDeterministicExtraction(transcript, brand, weights);
+  }
+
+  /**
+   * OpenAI GPT-4o real inference implementation
+   */
+  private async callOpenAiExtraction(
+    openai: OpenAI,
+    transcript: TranscriptSegment[],
+    brand: BrandDnaProfile,
+    weights: any
+  ): Promise<ExtractedClipCandidate[]> {
+    const transcriptText = transcript.map((t) => `[${t.start}s - ${t.end}s] ${t.speaker}: ${t.text}`).join('\n');
+
+    const prompt = `You are SLAYCUT, an elite video content intelligence engine.
+Analyze this video transcript and identify the top 3-5 most viral, high-retention clips (between 15s and 60s).
+
+Brand DNA Guidelines:
+- Brand: ${brand.brandName} (${brand.niche})
+- Target Audience: ${brand.targetAudience}
+- Archetype: ${brand.voiceArchetype}
+- Tone Profile: Formality ${brand.toneProfile.formality}%, Humor ${brand.toneProfile.humor}%, Enthusiasm ${brand.toneProfile.enthusiasm}%, Provocation ${brand.toneProfile.provocation}%, Technical Depth ${brand.toneProfile.technicalDepth}%
+- Banned Words (NEVER USE): ${JSON.stringify(brand.bannedPhrases)}
+- Preferred Keywords: ${JSON.stringify(brand.preferredKeywords)}
+- CRITICAL Learned Creator Memory Rules:
+${brand.learnedRules.map((r, i) => `  ${i + 1}. ${r}`).join('\n')}
+
+Transcript:
+${transcriptText}
+
+Return a valid JSON array of clip objects matching this schema:
+[
+  {
+    "title": "Punchy clip headline",
+    "summary": "1-2 sentence summary",
+    "startTime": 0.0,
+    "endTime": 42.5,
+    "durationSeconds": 42.5,
+    "viralityScore": 94,
+    "viralityMetrics": {
+      "hookImpact": 96,
+      "energyPacing": 90,
+      "valueDensity": 94,
+      "retentionPrediction": 92,
+      "brandAlignment": 95
+    },
+    "explainableReasons": [
+      "Curiosity gap established in first 2.4s",
+      "Features quantifiable benchmark data",
+      "Matches creator voice preference"
+    ],
+    "hookVariations": [
+      "Hook A (Contrarian): ...",
+      "Hook B (Pain Point): ...",
+      "Hook C (Data Anchor): ..."
+    ],
+    "captionPresets": {
+      "tiktok": "caption text with tags",
+      "instagram": "caption text with tags",
+      "youtube": "caption text with tags",
+      "linkedin": "caption text with tags",
+      "x": "caption text with tags"
+    },
+    "recommendedHashtags": ["#tag1", "#tag2"],
+    "subtitleStyle": "karaoke_pop"
+  }
+]`;
+
+    const res = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+      temperature: 0.7,
+    });
+
+    const content = res.choices[0]?.message?.content || '{}';
+    const parsed = JSON.parse(content);
+    const clips = Array.isArray(parsed) ? parsed : parsed.clips || [];
+
+    return clips.map((c: any) => ({
+      ...c,
+      isSimulated: false,
+      aiProvider: 'openai-gpt4o',
+    }));
+  }
+
+  /**
+   * Google Gemini 1.5 real inference implementation
+   */
+  private async callGeminiExtraction(
+    genAI: GoogleGenerativeAI,
+    transcript: TranscriptSegment[],
+    brand: BrandDnaProfile,
+    weights: any
+  ): Promise<ExtractedClipCandidate[]> {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const transcriptText = transcript.map((t) => `[${t.start}s - ${t.end}s] ${t.speaker}: ${t.text}`).join('\n');
+
+    const prompt = `You are SLAYCUT. Extract the top 3-5 viral clips (15-60s) from this transcript into JSON format.
+Respect Brand Archetype: ${brand.voiceArchetype}.
+Avoid: ${brand.bannedPhrases.join(', ')}.
+Apply Learned Creator Rules: ${brand.learnedRules.join('; ')}.
+
+Transcript:
+${transcriptText}
+
+Respond ONLY with valid JSON array of objects with title, summary, startTime, endTime, durationSeconds, viralityScore (0-100), viralityMetrics, explainableReasons, hookVariations, captionPresets (tiktok, instagram, youtube, linkedin, x), recommendedHashtags, subtitleStyle.`;
+
+    const res = await model.generateContent(prompt);
+    const text = res.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(text);
+    const clips = Array.isArray(parsed) ? parsed : parsed.clips || [];
+
+    return clips.map((c: any) => ({
+      ...c,
+      isSimulated: false,
+      aiProvider: 'gemini-1.5',
+    }));
+  }
+
+  /**
+   * Deterministic rule-based extraction fallback (Clearly labeled as Demo Mode)
+   */
+  private runDeterministicExtraction(
+    transcript: TranscriptSegment[],
+    brand: BrandDnaProfile,
+    weights: any
+  ): ExtractedClipCandidate[] {
     const candidates: ExtractedClipCandidate[] = [];
     const windowSizes = [3, 4, 5, 6];
 
@@ -94,7 +258,7 @@ export class ContentIntelligenceEngine {
         const endTime = window[window.length - 1].end;
         const duration = Math.round((endTime - startTime) * 10) / 10;
 
-        if (duration < 12 || duration > 75) continue;
+        if (duration < 10 || duration > 75) continue;
 
         const combinedText = window.map((w) => w.text).join(' ');
         const firstSegment = window[0].text;
@@ -105,14 +269,24 @@ export class ContentIntelligenceEngine {
           hookScore += 18;
         }
         if (/\?|!/.test(firstSegment)) hookScore += 6;
-        if (firstSegment.split(' ').length < 14) hookScore += 5; // Punchy opening
+        if (firstSegment.split(' ').length < 14) hookScore += 5;
+
+        // Influence of Learned Creator Memory Rules
+        brand.learnedRules.forEach((rule) => {
+          if (/numbers|counter-intuitive/i.test(rule) && /\d+%|\$\d+/.test(firstSegment)) {
+            hookScore += 6; // Rewarded based on learned rule!
+          }
+          if (/eliminate|declarative|no questions/i.test(rule) && !/\?/.test(firstSegment)) {
+            hookScore += 4;
+          }
+        });
         hookScore = Math.min(99, Math.max(60, hookScore));
 
         // 2. Energy & Pacing Calculation (0-100)
         const wordCount = combinedText.split(/\s+/).length;
         const wpm = (wordCount / duration) * 60;
         let pacingScore = 75;
-        if (wpm >= 140 && wpm <= 185) pacingScore += 16; // Optimal retention velocity
+        if (wpm >= 140 && wpm <= 185) pacingScore += 16;
         else if (wpm > 185) pacingScore += 10;
         else pacingScore -= 5;
         pacingScore = Math.min(98, Math.max(58, pacingScore));
@@ -154,54 +328,28 @@ export class ContentIntelligenceEngine {
             totalWeight
         );
 
-        // Filter high performers
-        if (compositeScore >= 80) {
-          // Generate explainable reasons
-          const explainableReasons: string[] = [];
-          if (hookScore >= 88) {
-            explainableReasons.push(
-              `High Hook Impact (${hookScore}/100): Opening line leverages cognitive dissonance or curiosity gap in the first 2.5s.`
-            );
-          }
-          if (pacingScore >= 85) {
-            explainableReasons.push(
-              `Optimal Pacing Velocity (${wpm.toFixed(0)} WPM): Cadence stays within the top-decile engagement retention threshold.`
-            );
-          }
-          if (valueScore >= 85) {
-            explainableReasons.push(
-              `Dense Value Delivery (${valueScore}/100): Features concrete quantifiable metrics and an actionable tactical solution.`
-            );
-          }
-          if (brandScore >= 85) {
-            explainableReasons.push(
-              `Brand DNA Resonance (${brandScore}/100): Matches your archetype (${brand.voiceArchetype}) and incorporates key brand pillars.`
-            );
-          }
+        if (compositeScore >= 78) {
+          const explainableReasons: string[] = [
+            `High Hook Impact (${hookScore}/100): Opening line leverages pattern interrupt in the first 2.5s.`,
+            `Pacing Velocity (${wpm.toFixed(0)} WPM): Cadence stays within top-decile retention benchmarks.`,
+            `Value Density (${valueScore}/100): Contains concrete actionable takeaways.`,
+            `Brand Alignment (${brandScore}/100): Reflects ${brand.voiceArchetype} archetype and learned creator rules.`,
+          ];
 
-          // Generate Platform Presets
           const title = this.generatePunchyTitle(firstSegment);
           const hookVariations = [
-            `Hook 1 (Contrarian): "${this.makeContrarianHook(firstSegment)}"`,
-            `Hook 2 (Urgency/FOMO): "${this.makeUrgencyHook(firstSegment)}"`,
-            `Hook 3 (Data Anchor): "${this.makeDataHook(firstSegment)}"`,
+            `Hook A (Contrarian): "${this.makeContrarianHook(firstSegment)}"`,
+            `Hook B (Urgency): "${this.makeUrgencyHook(firstSegment)}"`,
+            `Hook C (Data Anchor): "${this.makeDataHook(firstSegment)}"`,
           ];
 
           const captionPresets = {
-            tiktok: `${title} ⚡️ Watch until the end for the exact architecture. Save this for later! #techtok #coding #ai #viral`,
-            instagram: `The truth about ${brand.niche} nobody talks about 📌\n\n${combinedText.slice(0, 180)}...\n\nSave this reel if you found this valuable and share it with someone building right now!`,
-            youtube: `${title} #shorts\n\nKey insight: ${combinedText.slice(0, 140)}...\n\nSubscribe for daily deep dives!`,
-            linkedin: `A counter-intuitive truth every leader in ${brand.niche} needs to hear:\n\n${firstSegment}\n\nKey takeaways from this breakdown:\n1. Move fast without breaking compounding state\n2. Focus on leverage over raw effort\n3. Optimize the state delta, not the conversational history\n\nWhat is your team's experience with this?`,
+            tiktok: `${title} ⚡️ Watch until the end for the breakdown. Save this for later! #techtok #coding #ai #viral`,
+            instagram: `The truth about ${brand.niche} nobody talks about 📌\n\n${combinedText.slice(0, 180)}...\n\nSave this reel if you found this valuable!`,
+            youtube: `${title} #shorts\n\nKey takeaway: ${combinedText.slice(0, 140)}...\n\nSubscribe for daily deep dives!`,
+            linkedin: `A counter-intuitive truth every leader in ${brand.niche} needs to hear:\n\n${firstSegment}\n\nKey takeaways:\n1. Focus on compounding state, not prompt wrappers\n2. Minimize recursive reasoning drift\n3. Pass the verified delta\n\nWhat is your team's experience with this?`,
             x: `${title}.\n\nHere is the 30-second breakdown on why this changes everything 🧵👇`,
           };
-
-          const recommendedHashtags = [
-            `#${brand.niche.replace(/[^a-zA-Z0-9]/g, '')}`,
-            '#ContentIntelligence',
-            '#ViralHooks',
-            '#TechFounders',
-            '#AIEngineering',
-          ];
 
           candidates.push({
             title,
@@ -220,24 +368,26 @@ export class ContentIntelligenceEngine {
             explainableReasons,
             hookVariations,
             captionPresets,
-            recommendedHashtags,
+            recommendedHashtags: [
+              `#${brand.niche.replace(/[^a-zA-Z0-9]/g, '')}`,
+              '#ContentIntelligence',
+              '#ViralHooks',
+              '#TechBuilders',
+            ],
             subtitleStyle: compositeScore > 92 ? 'karaoke_pop' : 'mr_beast',
+            isSimulated: true,
+            aiProvider: 'builtin-deterministic',
           });
         }
       }
     }
 
-    // Sort by virality score descending and deduplicate overlapping clips
     candidates.sort((a, b) => b.viralityScore - a.viralityScore);
     const uniqueClips: ExtractedClipCandidate[] = [];
 
     for (const cand of candidates) {
-      const overlaps = uniqueClips.some(
-        (u) => Math.abs(u.startTime - cand.startTime) < 8
-      );
-      if (!overlaps) {
-        uniqueClips.push(cand);
-      }
+      const overlaps = uniqueClips.some((u) => Math.abs(u.startTime - cand.startTime) < 8);
+      if (!overlaps) uniqueClips.push(cand);
       if (uniqueClips.length >= 6) break;
     }
 
@@ -272,7 +422,7 @@ export class ContentIntelligenceEngine {
       learnedRule = 'Format LinkedIn updates with single-line paragraph breaks and scannable bullet points.';
       diffSummary = 'Restructured content into high-readability spaced micro-paragraphs.';
     } else {
-      learnedRule = `Incorporate creator's refined terminology: prioritize keywords like "${editWords.slice(0, 3).join(' ')}".`;
+      learnedRule = `Incorporate creator refined terminology: prioritize keywords like "${editWords.slice(0, 3).join(' ')}".`;
       diffSummary = 'Customized vocabulary and personal voice nuance.';
     }
 
@@ -298,8 +448,9 @@ export class ContentIntelligenceEngine {
     simulatedImpressions: number;
     simulatedClicks: number;
     isWinner: boolean;
+    isSimulated: boolean;
   }> {
-    const results = variants.map((v, index) => {
+    const results = variants.map((v) => {
       let score = 5.0;
       if (/^\d+|99%|truth|brutal|stop|how to/i.test(v.content)) score += 2.5;
       if (/\?/.test(v.content)) score -= 0.8;
@@ -324,10 +475,10 @@ export class ContentIntelligenceEngine {
         simulatedImpressions: impressions,
         simulatedClicks: clicks,
         isWinner: false,
+        isSimulated: true,
       };
     });
 
-    // Mark winner
     let maxClicks = -1;
     let winnerIndex = 0;
     results.forEach((r, idx) => {
@@ -381,7 +532,6 @@ export class ContentIntelligenceEngine {
     };
   }
 
-  // --- Helpers ---
   private generatePunchyTitle(segment: string): string {
     const cleaned = segment.replace(/[^a-zA-Z0-9\s]/g, '').trim();
     const words = cleaned.split(/\s+/).slice(0, 8).join(' ');

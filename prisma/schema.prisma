@@ -1,4 +1,4 @@
-// Prisma schema for CLIPFORGE AI
+// Prisma schema for SLAYCUT
 // Production Content Intelligence Platform
 
 generator client {
@@ -51,24 +51,28 @@ model BrandDNA {
 }
 
 model VideoProject {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title           String
-  description     String?
-  sourceUrl       String?
-  videoType       String   @default("podcast") // "podcast", "keynote", "interview", "youtube"
-  durationSeconds Float    @default(0)
-  status          String   @default("completed") // "uploaded", "transcribing", "analyzing", "completed", "failed"
-  transcriptText  String?
-  transcriptJson  String?  // JSON string: array of { id, start, end, speaker, text, score, sentiment }
-  thumbnailUrl    String?
-  metadataJson    String?  // JSON string: resolution, fps, bitrate, audioTracks
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  description         String?
+  sourceUrl           String?
+  videoFilePath       String?  // Local filesystem path for FFmpeg processing
+  audioFilePath       String?  // Extracted audio path for Whisper transcription
+  videoType           String   @default("podcast") // "podcast", "keynote", "interview", "youtube"
+  durationSeconds     Float    @default(0)
+  status              String   @default("completed") // "uploaded", "transcribing", "analyzing", "completed", "failed"
+  transcriptionEngine String   @default("whisper-api") // "whisper-api", "gemini-1.5", "demo_deterministic"
+  isSimulated         Boolean  @default(false)
+  transcriptText      String?
+  transcriptJson      String?  // JSON string: array of { id, start, end, speaker, text, score, sentiment }
+  thumbnailUrl        String?
+  metadataJson        String?  // JSON string: resolution, fps, bitrate, audioTracks
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  clips           ExtractedClip[]
-  abExperiments   ABExperiment[]
+  clips               ExtractedClip[]
+  abExperiments       ABExperiment[]
 }
 
 model ExtractedClip {
@@ -92,6 +96,12 @@ model ExtractedClip {
   status               String        @default("extracted") // "extracted", "approved", "scheduled", "published"
   performanceFeedback  String?       // "high", "neutral", "low"
   creatorEditsJson     String?       // JSON diffs
+  renderedVideoUrl     String?       // Public URL to the clipped MP4
+  renderedVerticalUrl   String?       // Public URL to 9:16 vertical render
+  subtitleSrtUrl       String?       // Public URL to downloadable SRT subtitles
+  isSimulated          Boolean       @default(false)
+  actualViews          Int           @default(0)
+  actualCtr            Float?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -111,6 +121,11 @@ model ABExperiment {
   testType          String         // "hook", "caption", "thumbnail"
   variantsJson      String         // JSON string: array of { id, label, content, predictedCtr, confidence, audienceReaction, simulatedImpressions, simulatedClicks }
   winnerVariantId   String?
+  isSimulated       Boolean        @default(true)  // Differentiates AI prediction vs real in-market data
+  realImpressions   Int            @default(0)
+  realClicks        Int            @default(0)
+  realCtr           Float?
+  verifiedWinnerId  String?
   status            String         @default("running") // "draft", "running", "concluded"
   insightsSummary   String?
   createdAt         DateTime       @default(now())

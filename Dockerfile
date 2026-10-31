@@ -1,4 +1,4 @@
-# Production Dockerfile for CLIPFORGE AI
+# Production Dockerfile for SLAYCUT
 FROM node:20-alpine AS base
 
 # Install dependencies only when needed

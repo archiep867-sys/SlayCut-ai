@@ -49,7 +49,7 @@ export default function Navbar({ title = 'Dashboard Overview', subtitle }: Navba
 
         {/* GitHub Link */}
         <a
-          href="https://github.com/archiep867-sys/clipforge-ai"
+          href="https://github.com/archiep867-sys/slaycut"
           target="_blank"
           rel="noopener noreferrer"
           className="p-2 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"

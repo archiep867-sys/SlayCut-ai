@@ -154,7 +154,7 @@ export default function BrandDnaPage() {
             Brand DNA & Adaptive Voice Memory
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Configure your tone sliders, prohibited jargon, and target audience. CLIPFORGE automatically updates learned guidelines whenever you edit AI captions.
+            Configure your tone sliders, prohibited jargon, and target audience. SLAYCUT automatically updates learned guidelines whenever you edit AI captions.
           </p>
         </div>
 
@@ -389,7 +389,7 @@ export default function BrandDnaPage() {
             </div>
 
             <p className="text-xs text-slate-400">
-              Every time you edit a hook or rewrite a caption in the Clips Studio, CLIPFORGE extracts your personal preference pattern and saves it here.
+              Every time you edit a hook or rewrite a caption in the Clips Studio, SLAYCUT extracts your personal preference pattern and saves it here.
             </p>
 
             {/* Add Custom Rule */}

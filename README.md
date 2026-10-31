@@ -1,4 +1,4 @@
-# ⚡️ CLIPFORGE AI — Autonomous Content Intelligence Platform
+# ⚡️ SLAYCUT — Autonomous Content Intelligence Platform
 
 > **Production-ready, AI-powered content intelligence platform.** Transform 1 long video or podcast into 10 high-retention viral reels with transparent explainability scores, persistent brand voice memory, synthetic audience A/B testing, and cross-platform publishing.
 
@@ -12,8 +12,8 @@
 ---
 
 ## 🚀 Live Deployment & Repository
-- **Live Public HTTPS URL:** [https://clipforge-ai.loca.lt](https://clipforge-ai.loca.lt) *(Tunnel Password if prompted: `206.84.228.156`)*
-- **GitHub Repository:** [https://github.com/archiep867-sys/clipforge-ai](https://github.com/archiep867-sys/clipforge-ai)
+- **Live Public HTTPS URL:** [https://slaycut.loca.lt](https://slaycut.loca.lt) *(Tunnel Password if prompted: `206.84.228.156`)*
+- **GitHub Repository:** [https://github.com/archiep867-sys/slaycut](https://github.com/archiep867-sys/slaycut)
 - **Local Dashboard:** [http://localhost:3000](http://localhost:3000)
 
 ---
@@ -41,7 +41,7 @@
 ### 3. 🧬 Brand DNA & Persistent Voice Memory Feedback Loop
 - **5 Interactive Tone Sliders:** Formality, Humor & Wit, Enthusiasm, Provocativeness, and Technical Depth (0–100%).
 - **Voice Archetypes:** Select from *The Visionary Provocateur*, *The Practical Systems Builder*, *The Deep Epistemic Thinker*, or *The High-Energy Disruptor*.
-- **Autonomous Learning from Creator Edits:** When you modify an AI-generated caption or hook in the Clips Studio, CLIPFORGE computes the diff, extracts your stylistic preference (e.g. *"Replace rhetorical questions with bold declarative assertions"*), and persists it into your `BrandDNA.learnedRules` vector.
+- **Autonomous Learning from Creator Edits:** When you modify an AI-generated caption or hook in the Clips Studio, SLAYCUT computes the diff, extracts your stylistic preference (e.g. *"Replace rhetorical questions with bold declarative assertions"*), and persists it into your `BrandDNA.learnedRules` vector.
 
 ### 4. 🧪 Synthetic AI A/B Testing Lab
 - Test alternative **Opening Hooks**, **Platform Captions**, or **Thumbnail Premises**.
@@ -49,7 +49,7 @@
 
 ### 5. 📅 Content Calendar & 30-Day Campaign Strategy
 - Multi-channel publishing calendar with platform-specific filtering.
-- **Autonomous Campaign Planner:** Input a primary high-level objective (e.g., *"Acquire 2,500 Qualified Developer Waitlist Signups"*), and CLIPFORGE synthesizes a 4-week thematic campaign with weekly pillars and daily action directives.
+- **Autonomous Campaign Planner:** Input a primary high-level objective (e.g., *"Acquire 2,500 Qualified Developer Waitlist Signups"*), and SLAYCUT synthesizes a 4-week thematic campaign with weekly pillars and daily action directives.
 
 ### 6. 📊 Closed-Loop Performance Analytics
 - **Second-by-Second Retention Curvature:** Interactive drop-off curve displaying retention rates from second 0 (100%) through second 48 (68%), highlighting crucial hook lock-in moments.
@@ -99,7 +99,7 @@ graph TD
 
 ## ⚡️ Seamless Demo Mode
 
-CLIPFORGE AI comes pre-packaged with a complete, fully persistent **Demo Mode**:
+SLAYCUT comes pre-packaged with a complete, fully persistent **Demo Mode**:
 - **Pre-seeded data:** High-value 42-minute podcast transcript (*"The Trillion Dollar AI Agent Architecture"*), pre-computed virality scores, platform presets, and second-by-second retention curves.
 - **Zero API keys required to start:** Works entirely out-of-the-box using the built-in deterministic intelligence engine.
 - **Real Database Persistence:** All edits, votes, brand rule updates, and scheduled posts are saved to SQLite via Prisma.
@@ -115,8 +115,8 @@ CLIPFORGE AI comes pre-packaged with a complete, fully persistent **Demo Mode**:
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/archiep867-sys/clipforge-ai.git
-cd clipforge-ai
+git clone https://github.com/archiep867-sys/slaycut.git
+cd slaycut
 ```
 
 ### Step 2: Install Dependencies
@@ -132,7 +132,7 @@ cp .env.example .env
 Default `.env` configuration:
 ```env
 DATABASE_URL="file:./dev.db"
-JWT_SECRET="clipforge-super-secret-production-jwt-key-2026"
+JWT_SECRET="slaycut-super-secret-production-jwt-key-2026"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 DEMO_MODE="true"
 NODE_ENV="development"
@@ -154,18 +154,18 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🧪 Running the Verification Test Suite
 
-CLIPFORGE AI includes a comprehensive 29-point end-to-end test suite that verifies all core workflows:
+SLAYCUT includes a comprehensive 29-point end-to-end test suite that verifies all core workflows:
 ```bash
 node scripts/test-flows.js
 ```
 
 **Verification Output:**
 ```
-🧪 Starting CLIPFORGE AI End-to-End Verification Suite...
+🧪 Starting SLAYCUT End-to-End Verification Suite...
 
 --- 1. Authentication & Database Persistence ---
   ✅ [PASS] Demo creator user exists in database
-  ✅ [PASS] User email verified (archie@clipforge.ai)
+  ✅ [PASS] User email verified (archie@slaycut.ai)
   ✅ [PASS] Brand DNA profile linked and loaded
 
 --- 2. Brand DNA Voice Configuration ---
@@ -231,8 +231,8 @@ node scripts/test-flows.js
 ### Option B: Deploy to Docker / Container
 Build and run the production container:
 ```bash
-docker build -t clipforge-ai .
-docker run -p 3000:3000 -e DATABASE_URL="file:./dev.db" clipforge-ai
+docker build -t slaycut .
+docker run -p 3000:3000 -e DATABASE_URL="file:./dev.db" slaycut
 ```
 
 ---

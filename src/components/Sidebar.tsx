@@ -48,7 +48,7 @@ export default function Sidebar() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
-                  CLIPFORGE
+                  SLAYCUT
                 </span>
                 <span className="text-xs px-1.5 py-0.5 rounded font-mono font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
                   AI
@@ -128,7 +128,7 @@ export default function Sidebar() {
                 <p className="text-xs font-semibold text-slate-200 truncate">Archie Patel</p>
                 <CheckCircle2 className="w-3 h-3 text-indigo-400 flex-shrink-0" />
               </div>
-              <p className="text-[11px] text-slate-400 truncate">archie@clipforge.ai</p>
+              <p className="text-[11px] text-slate-400 truncate">archie@slaycut.ai</p>
             </div>
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800/60">

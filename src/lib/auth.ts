@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { prisma } from './prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clipforge-fallback-secret-2026';
-const AUTH_COOKIE_NAME = 'clipforge_token';
+const JWT_SECRET = process.env.JWT_SECRET || 'slaycut-fallback-secret-2026';
+const AUTH_COOKIE_NAME = 'slaycut_token';
 
 export interface TokenPayload {
   userId: string;
@@ -40,7 +40,7 @@ export async function getCurrentUser() {
     if (!token) {
       // Fallback to demo user if present in dev/demo mode
       const demoUser = await prisma.user.findFirst({
-        where: { email: 'archie@clipforge.ai' },
+        where: { email: 'archie@slaycut.ai' },
         include: { brandDNA: true, learningPreferences: true },
       });
       return demoUser;
@@ -49,7 +49,7 @@ export async function getCurrentUser() {
     const payload = verifyToken(token);
     if (!payload?.userId) {
       const demoUser = await prisma.user.findFirst({
-        where: { email: 'archie@clipforge.ai' },
+        where: { email: 'archie@slaycut.ai' },
         include: { brandDNA: true, learningPreferences: true },
       });
       return demoUser;

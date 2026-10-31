@@ -43,7 +43,7 @@ export default function SettingsPage() {
           Settings, API Keys & Intelligence Runtime
         </h2>
         <p className="text-xs text-slate-400 mt-1">
-          Configure external LLM providers or rely on CLIPFORGE's built-in intelligent algorithm with full SQLite persistence.
+          Configure external LLM providers or rely on SLAYCUT's built-in intelligent algorithm with full SQLite persistence.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function SettingsPage() {
             Seamless Demo Mode Active
           </h4>
           <p className="text-xs text-slate-300 leading-relaxed">
-            External credentials and video cloud render clusters are optional. When API keys are not supplied, CLIPFORGE AI operates in <strong>Clearly Labelled Demo Mode</strong> with complete local SQLite database persistence, high-fidelity sample processing, and interactive voice learning feedback loops.
+            External credentials and video cloud render clusters are optional. When API keys are not supplied, SLAYCUT operates in <strong>Clearly Labelled Demo Mode</strong> with complete local SQLite database persistence, high-fidelity sample processing, and interactive voice learning feedback loops.
           </p>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function SettingsPage() {
             {[
               {
                 id: 'builtin',
-                name: 'CLIPFORGE Built-in Intelligence Engine',
+                name: 'SLAYCUT Built-in Intelligence Engine',
                 desc: 'Deterministic multi-factor virality scoring, speech analysis & voice memory (zero API fees)',
                 recommended: true,
               },

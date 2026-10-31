@@ -1,8 +1,8 @@
 {
-  "name": "clipforge-ai",
+  "name": "slaycut",
   "version": "1.0.0",
   "private": true,
-  "description": "Production-ready, AI-powered content intelligence platform for viral clip extraction, brand voice memory, A/B testing and multi-platform growth.",
+  "description": "SLAYCUT — AI video repurposing studio for creators.",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "prisma generate && next build",
@@ -12,6 +12,7 @@
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.21.1",
     "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.3",
@@ -19,6 +20,7 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",
+    "openai": "^7.47.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.13.0",

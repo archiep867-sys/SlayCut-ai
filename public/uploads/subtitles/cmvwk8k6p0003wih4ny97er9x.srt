@@ -1,0 +1,11 @@
+1
+00:00:00,000 --> 00:00:04,166
+95% of people building AI applications right now are doing something fatally flawed.
+
+2
+00:00:04,366 --> 00:00:08,333
+They obsess over prompt wrappers without building any proprietary workflow state memory.
+
+3
+00:00:08,533 --> 00:00:12,500
+When the foundation model updates, their entire application is commoditized overnight.
